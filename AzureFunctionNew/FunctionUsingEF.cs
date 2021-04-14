@@ -83,25 +83,25 @@ namespace AzureFunctionNew
                                    .GetAsync();
 
 
-                if (groups?.Count > 0)
-                {
-                    foreach (Group group in groups)
+                    if (groups?.Count > 0)
                     {
-                        AADGroup aadGroup = new AADGroup(group.Id, group.DisplayName);
-                        log.LogInformation($"Processing '{group.DisplayName}'");
-
-                        var groupUsers = await client.Groups[group.Id].Members.Request().GetAsync();
-                        do
+                        foreach (Group group in groups)
                         {
-                            foreach (User user in groupUsers)
+                            AADGroup aadGroup = new AADGroup(group.Id, group.DisplayName);
+                            log.LogInformation($"Processing '{group.DisplayName}'");
+
+                            var groupUsers = await client.Groups[group.Id].Members.Request().GetAsync();
+                            do
                             {
-                                users.Add(new AADUser(group, user.Id, "User", user.DisplayName, user.UserPrincipalName));
+                                foreach (User user in groupUsers)
+                                {
+                                    users.Add(new AADUser(group, user.Id, "User", user.DisplayName, user.UserPrincipalName));
+                                }
                             }
+                            while (groupUsers.NextPageRequest != null && (groupUsers = await groupUsers.NextPageRequest.GetAsync()).Count > 0);
+                            aadGroups.Add(aadGroup);
                         }
-                        while (groupUsers.NextPageRequest != null && (groupUsers = await groupUsers.NextPageRequest.GetAsync()).Count > 0);
-                        aadGroups.Add(aadGroup);
                     }
-                }
                 }
                 catch (Exception e)
                 {
@@ -115,11 +115,12 @@ namespace AzureFunctionNew
             log.LogInformation(accessToken);
             int businessAreas = 0;
             SqlConnection conn = new SqlConnection();
-            //conn.AccessToken = accessToken;
+            conn.AccessToken = accessToken;
             GetDatabaseConnection(env.ToUpper(), conn);
-           try
-            { conn.ConnectionString = "Data Source=shell-01-eun-sq-nfowhbtpuquawrbuwtjv.database.windows.net; Initial Catalog = shell-01-eun-sqdb-qddsheofnywfaatpszdy;Persist Security Info=False;User ID=DATA_BRICKS;Password=DB@12345;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;";
-            
+            try
+            {
+                //conn.ConnectionString = "Data Source=shell-01-eun-sq-nfowhbtpuquawrbuwtjv.database.windows.net; Initial Catalog = shell-01-eun-sqdb-qddsheofnywfaatpszdy;Persist Security Info=False;User ID=DATA_BRICKS;Password=DB@12345;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;";
+
                 conn.Open();
                 //string queryString = "select count(*) from DM_MDM.DIM_BUSINESS_AREA";
                 // Create the Command and Parameter objects.
@@ -186,7 +187,7 @@ namespace AzureFunctionNew
             };
         }
 
-        public static async Task<String> getAADToken(string resource,string aad)
+        public static async Task<String> getAADToken(string resource, string aad)
         {
             var azureServiceTokenProvider = new AzureServiceTokenProvider();
             return await azureServiceTokenProvider.GetAccessTokenAsync(resource, aad);
@@ -221,7 +222,7 @@ namespace AzureFunctionNew
                     break;
             }
         }
-        private static async Task<GraphServiceClient> GetGraphApiClient(ILogger log,string aad)
+        private static async Task<GraphServiceClient> GetGraphApiClient(ILogger log, string aad)
         {
 
             var azureServiceTokenProvider = new AzureServiceTokenProvider();
