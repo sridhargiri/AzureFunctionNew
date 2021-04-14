@@ -1,0 +1,4 @@
+{
+  "AzureDBModelEntities": "Server=tcp:shell-01-eun-sq-nfowhbtpuquawrbuwtjv.database.windows.net,1433;Initial Catalog=shell-01-eun-sqdb-qddsheofnywfaatpszdy; Persist Security Info=False;User ID=DATA_BRICKS;Password=DB@12345;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;",
+  "AAD_TENANT": "db1e96a8-a3da-442a-930b-235cac24cd5c"
+}
